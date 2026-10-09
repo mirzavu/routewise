@@ -8,3 +8,5 @@
 - Task 1 complete: 45 risk/geometry tests pass; expected RED verified before implementation.
 - Task 2 initial implementation complete: full suite 56 passing. Weather/API tests observed failing before implementation.
 - Landing asset generated using built-in image tool and optimized to frontend/public/hero-truck.webp.
+- Landing screen complete and visually reviewed in Chrome DevTools at desktop and narrow widths. 5 frontend tests and 56 backend tests pass; production build passes.
+- Self-hosted Manrope and DM Sans fonts; generated hero asset is stored in repo.

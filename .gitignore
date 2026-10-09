@@ -13,3 +13,5 @@ backend/staticfiles/
 .superpowers/
 playwright-report/
 test-results/
+
+*.tsbuildinfo
