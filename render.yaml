@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: routewise
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: MAPBOX_ACCESS_TOKEN
+        sync: false
+      - key: MAPBOX_PUBLIC_TOKEN
+        sync: false

@@ -15,7 +15,7 @@ Truck-image landing with real form; map workspace with compact editable trip sum
 25-mile corridor buffer/grid, <=150 grid samples, 49 forecast frames, locally scrubbed weather-risk overlay. Arrival-time risks do not change when scrubbing. Independent overlay loading/failure.
 
 ## Task 5: Delivery
-Tests, production build, Chrome DevTools desktop/mobile review, Docker/Render config, README and Loom script. Publish only when account access is available; do not represent local readiness as deployment.
+Tests, production build, user desktop/mobile review, Docker/Render config, README and Loom script. Use Chrome DevTools only for a critical UI issue unresolved by normal debugging, per the user's updated instruction. Publish only when account access is available; do not represent local readiness as deployment.
 
 ## Decisions
 - At overlapping rain/snow boundaries use higher severity except strict No Travel >1 in/hr rain, >3 in/hr snow.

@@ -10,3 +10,10 @@
 - Landing asset generated using built-in image tool and optimized to frontend/public/hero-truck.webp.
 - Landing screen complete and visually reviewed in Chrome DevTools at desktop and narrow widths. 5 frontend tests and 56 backend tests pass; production build passes.
 - Self-hosted Manrope and DM Sans fonts; generated hero asset is stored in repo.
+- Tasks 3–4 implemented: shared trip editor, route comparison and recommendation, checkpoint inspector, Mapbox routes/checkpoints, and independently loaded 0–48-hour corridor forecast slider.
+- User-provided logo installed; requested landing captions and footer removed.
+- Scope: assessment PDF governs behavior, mockups govern visual direction only. Removed timeline autoplay; no accounts, saved trips, fleet, notifications or invented delay estimates.
+- Latest verification: backend 58 tests, frontend 10 tests, Ruff and production TypeScript/Vite build pass. Regression tests cover mph provider-unit variants, incomplete hourly arrays, autocomplete edits, example-trip submission, route selection and forecast independence.
+- Live Open-Meteo smoke check confirmed real units and 169-hour requested coverage. Live Mapbox analysis is pending a local token; no .env credentials supplied yet.
+- Docker/Render configuration, CI, README and Loom outline added. Container verification and final review in progress. No remote repository, deployment or Loom recording created.
+- User update: visual checks belong to the user. No further Chrome DevTools use unless a critical UI issue resists normal debugging.
