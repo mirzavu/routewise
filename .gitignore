@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+frontend/dist/
+backend/staticfiles/
+*.sqlite3
+.superpowers/
+playwright-report/
+test-results/
