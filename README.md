@@ -41,7 +41,7 @@ The **Try an example trip** action submits Dallas → Atlanta, 36,000 lb, depart
 | GET `/api/health` | — | Health status |
 | GET `/api/locations?q=…` | Search text, at least 3 characters | Labels, `[longitude, latitude]`, IANA timezone |
 | POST `/api/trips/analyze` | `origin`, `destination`, ISO departure, `load_lb`, `spacing_miles` | Routes, checkpoints, risk summaries, recommendation, warnings |
-| POST `/api/weather/corridor` | Up to 3 route coordinate arrays and `load_lb` | Corridor sample grid and 49 hourly risk frames |
+| POST `/api/weather/corridor` | Up to 3 route coordinate arrays, `load_lb`, and ISO 8601 `departure` | Corridor sample grid and 49 hourly risk frames from departure |
 
 Locations contain `label`, `coordinates` and `timezone`. All API dates include an offset; calculations use UTC. Coordinates always use longitude first. Validation errors return a human-readable `message` and optional `fields`. Provider outages return 502/503, no route returns 422. Anonymous requests are throttled in-process.
 
@@ -74,7 +74,13 @@ Load overrides: wind ≥55 mph blocks every load; 45–<55 mph with cargo >30,00
 
 The corridor grid covers a 25-mile buffer around the route alternatives. Grid spacing starts at 25 miles and coarsens to keep at most 150 weather samples. This never changes the chosen checkpoint spacing. The backend batches/caches weather requests and returns 49 hourly frames. The browser interpolates this sampled risk field for display on a canvas-backed raster layer. It is a forecast visualization, not live radar; it is not used to calculate route risk.
 
-The slider ranges from the current UTC hour to +48 hours, displayed in the selected trip timezone. Scrubbing changes only the overlay; rankings and checkpoint weather remain tied to arrival times. Frames are updated locally without network requests. Unknown samples are not assigned a risk color. Overlay failure leaves route results usable.
+The slider ranges from the exact selected departure (0h) through departure +48 hours, displayed in the selected trip timezone. Non-hour departures keep their minutes on each hourly frame and tick. The corridor request uses the same timezone conversion as trip analysis; changing the departure reloads its frames and resets the slider. The full 48-hour span remains visible regardless of trip duration. Hours beyond provider coverage show unavailable weather, with no risk color. Scrubbing changes only the overlay; rankings and checkpoint weather remain tied to arrival times. Frames are updated locally without network requests. Overlay failure leaves route results usable.
+
+Timeline icons show the wind, rain or snow condition producing the highest corridor risk at that hour, using the same thresholds and cargo wind overrides as the risk band. Tied conditions appear together; a shield indicates all three are Low, and a question mark indicates unavailable risk details. Icon colors match the risk band. General weather condition codes do not choose these icons.
+
+On the map, small dots show all route checkpoints. Larger weather markers appear at every checkpoint with Moderate or higher arrival-time risk (score 1–4), using the same wind/rain/snow symbols and risk colors as the timeline. Tied contributors appear together, and each tooltip identifies the route, checkpoint, condition and arrival-time risk. Selecting a checkpoint enlarges its marker.
+
+The timeline marks the selected route's exact arrival time with a vertical line and local time label. Selecting another route moves the marker without changing the forecast hour. Trips ending after the 48-hour window show their arrival in a note instead of placing a marker at an incorrect time.
 
 ## Tests and checks
 

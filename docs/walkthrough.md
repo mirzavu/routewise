@@ -22,7 +22,7 @@ Open a checkpoint on the map or list. Show ETA, wind/rain/snow units and the ris
 
 ## 4:15–5:00 — Forecast exploration
 
-Move the slider through 48 hours and toggle the overlay. Explain that this is a sampled corridor forecast, and that scrubbing does not change arrival-time route scores. All frames are fetched once, so scrubbing stays local.
+Move the slider from the selected departure (0h) through +48 hours and toggle the overlay. The full span stays available even for a shorter trip; hours beyond forecast coverage display unavailable. Explain that this is a sampled corridor forecast, and that scrubbing does not change arrival-time route scores. All frames are fetched once per departure, so scrubbing stays local.
 
 ## 5:00–6:30 — Code and tests
 
