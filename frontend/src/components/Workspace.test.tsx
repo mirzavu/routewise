@@ -1,16 +1,24 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, it, vi } from 'vitest'
 import Workspace from './Workspace'
+import { toTripInput } from '../format'
 import type { Analysis, Route, TripDraft } from '../types'
 vi.mock('./RouteMap', () => ({
   default: ({
     onCheckpointSelect,
+    onCheckpointDismiss,
     routes,
   }: {
     onCheckpointSelect: (id: string, index: number) => void
+    onCheckpointDismiss: () => void
     routes: Route[]
-  }) => <button onClick={() => onCheckpointSelect(routes[0].id, 0)}>Map checkpoint</button>,
+  }) => (
+    <>
+      <button onClick={() => onCheckpointSelect(routes[0].id, 0)}>Map checkpoint</button>
+      <button onClick={onCheckpointDismiss}>Map background</button>
+    </>
+  ),
 }))
 const a: Route = {
   id: 'A',
@@ -77,20 +85,65 @@ const draft: TripDraft = {
 beforeEach(() => {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () => ({
+    vi.fn(async (_url: string, options?: RequestInit) => ({
       ok: true,
       json: async () => ({
         points: [[-96, 32]],
         bounds: [-97, 31, -95, 33],
         times: Array.from({ length: 49 }, (_, i) =>
-          new Date(Date.UTC(2026, 9, 12, 10 + i)).toISOString(),
+          new Date(
+            Date.parse(JSON.parse(options?.body as string).departure || '2026-10-12T10:00:00Z') +
+              i * 3600000,
+          ).toISOString(),
         ),
-        frames: Array.from({ length: 49 }, () => [1]),
+        frames: Array.from({ length: 49 }, (_, i) => [i < 24 ? 1 : null]),
+        risk_drivers: Array.from({ length: 49 }, (_, i) =>
+          i < 24 ? { wind: 1, rain: 0, snow: 0 } : { wind: null, rain: null, snow: null },
+        ),
         spacing_miles: 25,
         fetched_at: '2026-10-12T09:00:00Z',
       }),
     })),
   )
+})
+it('anchors all 48 forecast hours to the exact departure in the selected trip timezone', async () => {
+  const trip = { ...draft, date: '2026-10-13', time: '23:30' }
+  render(<Workspace result={result} trip={trip} token="" onEdit={() => {}} onHome={() => {}} />)
+  const slider = screen.getByRole('slider', { name: 'Forecast hour' })
+  await waitFor(() => expect(slider).toBeEnabled())
+  const request = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string)
+  expect(request.departure).toBe('2026-10-14T04:30:00.000Z')
+  expect(request.departure).toBe(toTripInput(trip).departure)
+  expect(slider).toHaveAttribute('aria-valuetext', 'Oct 13, 11:30 PM CDT')
+  const timeline = screen.getByRole('region', { name: '48-hour forecast' })
+  expect(within(timeline).getAllByText('11:30 PM').length).toBeGreaterThan(0)
+  fireEvent.change(slider, { target: { value: '48' } })
+  expect(slider).toHaveAttribute('aria-valuetext', 'Oct 15, 11:30 PM CDT')
+  expect(within(timeline).getByText('Forecast unavailable at this hour.')).toBeInTheDocument()
+  expect(within(timeline).queryByRole('img', { name: /^Low risk/ })).not.toBeInTheDocument()
+  expect(screen.getByText(/Recommended: Route A/)).toBeInTheDocument()
+})
+
+it('refreshes and resets the forecast when departure date, time or timezone changes', async () => {
+  const props = { result, token: '', onEdit: () => {}, onHome: () => {} }
+  const { rerender } = render(<Workspace {...props} trip={draft} />)
+  const slider = screen.getByRole('slider', { name: 'Forecast hour' })
+  await waitFor(() => expect(slider).toBeEnabled())
+  const edits = [
+    { ...draft, date: '2026-10-13' },
+    { ...draft, date: '2026-10-13', time: '23:30' },
+    { ...draft, date: '2026-10-13', time: '23:30', timezone: 'Asia/Kolkata' },
+  ]
+  for (const [index, trip] of edits.entries()) {
+    fireEvent.change(slider, { target: { value: '12' } })
+    rerender(<Workspace {...props} trip={trip} />)
+    await waitFor(() => expect(vi.mocked(fetch).mock.calls).toHaveLength(index + 2))
+    await waitFor(() => expect(slider).toBeEnabled())
+    expect(slider).toHaveValue('0')
+    const request = JSON.parse(vi.mocked(fetch).mock.calls[index + 1][1]?.body as string)
+    expect(request.departure).toBe(toTripInput(trip).departure)
+  }
+  expect(slider).toHaveAttribute('aria-valuetext', 'Oct 13, 11:30 PM GMT+5:30')
 })
 it('keeps recommendation stable when selecting another route and scrubbing forecast', async () => {
   render(<Workspace result={result} trip={draft} token="" onEdit={() => {}} onHome={() => {}} />)
@@ -110,4 +163,25 @@ it('opens arrival-time weather when a checkpoint is clicked', async () => {
   await userEvent.click(screen.getByText('Map checkpoint'))
   expect(screen.getByText('Heavy load increases wind risk.')).toBeInTheDocument()
   expect(screen.getByText('38 mph')).toBeInTheDocument()
+})
+
+it('closes checkpoint weather when the map dismisses it and can reopen it', async () => {
+  render(<Workspace result={result} trip={draft} token="" onEdit={() => {}} onHome={() => {}} />)
+  await userEvent.click(screen.getByText('Map checkpoint'))
+  expect(screen.getByText('Heavy load increases wind risk.')).toBeInTheDocument()
+  await userEvent.click(screen.getByText('Map background'))
+  expect(screen.queryByText('Heavy load increases wind risk.')).not.toBeInTheDocument()
+  await userEvent.click(screen.getByText('Map checkpoint'))
+  expect(screen.getByText('Heavy load increases wind risk.')).toBeInTheDocument()
+})
+
+it('toggles route visibility independently and restores a route when selected', async () => {
+  render(<Workspace result={result} trip={draft} token="" onEdit={() => {}} onHome={() => {}} />)
+  const toggle = screen.getByRole('checkbox', { name: 'Route B' })
+  expect(toggle).toBeChecked()
+  await userEvent.click(toggle)
+  expect(toggle).not.toBeChecked()
+  await userEvent.click(screen.getByRole('button', { name: /Inspect Route B/ }))
+  expect(toggle).toBeChecked()
+  expect(screen.getByText(/Recommended: Route A/)).toBeInTheDocument()
 })

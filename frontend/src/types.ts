@@ -20,10 +20,16 @@ export interface TripInput {
   load_lb: number
   spacing_miles: number
 }
+export interface WeatherRiskComponents {
+  wind: number | null
+  rain: number | null
+  snow: number | null
+}
 export interface Risk {
   level: number | null
   label: string
   reasons: string[]
+  components?: WeatherRiskComponents
 }
 export interface Checkpoint {
   index: number
@@ -69,12 +75,14 @@ export interface Corridor {
   spacing_miles: number
   times: string[]
   frames: (number | null)[][]
+  conditions?: { code: number | null; is_day: boolean | null }[]
+  risk_drivers?: WeatherRiskComponents[]
   fetched_at: string
 }
 export const RISK_LABELS = ['Low', 'Moderate', 'High', 'Severe', 'No Travel']
 export const RISK_COLORS = ['#2bab86', '#e9c34a', '#f58b35', '#ee5365', '#8739ba']
 export const ROUTE_COLORS: Record<string, string> = {
-  A: '#2379ef',
-  B: '#f69840',
-  C: '#b268d7',
+  A: '#087bff',
+  B: '#ff893b',
+  C: '#ff3659',
 }

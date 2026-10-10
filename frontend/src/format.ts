@@ -51,3 +51,20 @@ export function localTime(iso: string, zone: string, withDate = false) {
 export function city(label: string) {
   return label.split(',')[0]
 }
+
+export function routeName(name: string) {
+  const roads = name.split(',').map((road) =>
+    road
+      .trim()
+      .replace(/\bI[ -](\d+)/g, 'I-$1')
+      .replace(/\b(East|West|North|South)\b/g, (direction) => direction[0]),
+  )
+  return [...new Set(roads)]
+    .filter(
+      (road) =>
+        !roads.some(
+          (other) => other !== road && /^I-\d+$/.test(road) && other.startsWith(`${road} `),
+        ),
+    )
+    .join(' + ')
+}
