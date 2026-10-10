@@ -58,6 +58,7 @@ def get_locations(query):
             "autocomplete": "true",
             "limit": 5,
             "types": "place,address",
+            "country": "us",
             "language": "en",
         },
     )
