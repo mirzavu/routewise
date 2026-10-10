@@ -38,14 +38,24 @@ export default function RouteMap(props: Props) {
   }
   useEffect(() => {
     if (!element.current || !props.token) return
-    const map = new mapboxgl.Map({
-      container: element.current,
-      accessToken: props.token,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-90.5, 34],
-      zoom: 4,
-      attributionControl: false,
-    })
+    setError('')
+    let map: mapboxgl.Map
+    try {
+      map = new mapboxgl.Map({
+        container: element.current,
+        accessToken: props.token,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [-90.5, 34],
+        zoom: 4,
+        attributionControl: false,
+      })
+    } catch {
+      element.current.replaceChildren()
+      setError(
+        'The map could not start WebGL. Check your browser’s graphics settings and restart it, or try another browser. You can still compare routes and inspect checkpoints from the list.',
+      )
+      return
+    }
     mapRef.current = map
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right')
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right')
@@ -251,7 +261,7 @@ export default function RouteMap(props: Props) {
           {error}
         </div>
       )}
-      {props.token && (
+      {props.token && loaded && (
         <button className="fit-routes" onClick={fit}>
           <Expand size={15} />
           Fit routes

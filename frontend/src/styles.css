@@ -1223,7 +1223,7 @@ fieldset {
   overflow: hidden;
   background: #eaf0ee;
 }
-.route-map {
+.map-workspace .route-map {
   position: absolute;
   inset: 0;
 }
