@@ -129,7 +129,6 @@ export default function App() {
       <div className="landing-content">
         <header className="landing-header">
           <Brand />
-          <span className="header-caption">EVERY MILE, MORE INFORMED</span>
         </header>
         <section className="hero-copy">
           <h1>
