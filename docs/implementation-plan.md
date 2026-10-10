@@ -21,6 +21,6 @@ Tests, production build, user desktop/mobile review, Docker/Render config, READM
 - At overlapping rain/snow boundaries use higher severity except strict No Travel >1 in/hr rain, >3 in/hr snow.
 - Segment risk = worse endpoint. Average risk = distance-weighted 0..4 severity.
 - No Travel routes are visible but excluded; incomplete weather suppresses recommendation.
-- Mapbox may return fewer than 3 routes: display actual count, never fabricate alternatives.
+- Mapbox may return fewer than 3 routes: try at most two bounded pass-through corridor requests for additional genuine provider routes, reject excessive detours/duplicates/backtracking, then display the actual count. Never fabricate geometry or timing.
 - No driver rest model or cargo weight treated as total truck weight.
 - Missing credentials produce actionable configuration error, not fake live data.

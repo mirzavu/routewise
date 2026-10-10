@@ -24,7 +24,7 @@ Open http://localhost:5173. Vite proxies `/api` to Django on port 8000. Restart 
 
 `MAPBOX_PUBLIC_TOKEN` optionally supplies a separate URL-restricted `pk.` token for browser maps. If omitted, a public `MAPBOX_ACCESS_TOKEN` is also used for the map. Never use a secret `sk.` token as the public token. Grant only required Mapbox scopes and include localhost and the deployment URL in public-token restrictions. A server token must allow server-side geocoding and Directions requests.
 
-The **Try an example trip** action submits Dallas → Atlanta, 36,000 lb, departure at the next hour and 25-mile checks to the same live endpoint used by the form. Routing providers may return fewer than three distinct alternatives. Choose an origin/destination with three provider-returned alternatives for the final walkthrough after credentials are configured; do not duplicate routes to fill the screen.
+The **Try an example trip** action submits Dallas → Atlanta, 36,000 lb, departure at the next hour and 25-mile checks to the same live endpoint used by the form. This trip has been verified with three genuine Mapbox routes and complete arrival-time forecasts. Routing availability can change; fewer distinct alternatives are shown honestly when necessary.
 
 ## Architecture
 
@@ -68,6 +68,7 @@ Load overrides: wind ≥55 mph blocks every load; 45–<55 mph with cargo >30,00
 - Hourly wind is interpolated at arrival. Rain plus showers and snowfall use the preceding-hour accumulation record whose interval contains arrival. Snowfall depth is kept separate from liquid-equivalent precipitation.
 - Departures are accepted from now through the next six days, reserving time for travel within the seven-day request. All arrival times are checked against actual returned forecast coverage. Missing weather is unknown, never Low. The UI rejects nonexistent or ambiguous daylight-saving times.
 - ETAs are driving estimates, without rest stops, hours-of-service, loading stops, or custom truck restrictions. This is the assessment's weather comparison model, not a truck-navigation engine.
+- Mapbox's initial alternatives request can return only one or two routes. To try to obtain three, up to two additional requests guide through a point to either side of the fastest route's distance midpoint, offset by 10% of its mileage (maximum 80 miles). The point guides the provider without adding a stop. Supplemental routes must be within 25% of the fastest route's distance and 35% of its time; U-turns, more than 2% repeated-edge mileage and over 90% overlap with an existing shorter route are rejected. Road edges are compared at five decimal places. Supplemental service failure preserves the original routes. No geometry or timing is invented.
 
 ### Forecast overlay
 
@@ -87,6 +88,8 @@ npm run build --prefix frontend
 Backend tests cover thresholds, cargo overrides, ranking, checkpoint interpolation, partial intervals, weather units and intervals, missing coverage, and API validation. Frontend tests cover timezone conversion and DST, editing location searches, trip submission/recovery, route selection, checkpoint inspection, and slider independence. Tests use isolated provider fixtures; production has no demo-data fallback.
 
 Visual review is manual: check the landing page at desktop and mobile widths, submit a trip, switch routes, inspect a checkpoint, scrub the forecast, and edit the trip. Live Mapbox smoke testing requires configured credentials. The generated hero background and user-supplied logo are bundled local assets. The asset prompt is recorded in [docs/assets.md](docs/assets.md).
+
+Playwright also verifies the live trip flow. Mapbox GL JS needs WebGL2; if the browser cannot initialize it, an actionable message appears while route results and checkpoint-list inspection remain usable. Check `chrome://gpu` for browser graphics status. Enabling Chrome's graphics setting does not guarantee WebGL is available if the browser has blocked its graphics stack.
 
 ## Deployment
 
