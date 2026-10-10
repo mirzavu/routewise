@@ -11,7 +11,16 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "local-development-only-change-for-d
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
 if os.getenv("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
-INSTALLED_APPS = ["django.contrib.contenttypes", "rest_framework", "trips"]
+if os.getenv("VERCEL"):
+    ALLOWED_HOSTS.append(".vercel.app")
+    if os.getenv("VERCEL_PROJECT_PRODUCTION_URL"):
+        ALLOWED_HOSTS.append(os.environ["VERCEL_PROJECT_PRODUCTION_URL"])
+INSTALLED_APPS = [
+    "django.contrib.contenttypes",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "trips",
+]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

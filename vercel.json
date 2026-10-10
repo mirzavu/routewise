@@ -1,0 +1,28 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite",
+      "installCommand": "npm ci",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist",
+      "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+    },
+    "app": {
+      "root": ".",
+      "framework": "django",
+      "entrypoint": "vercel_wsgi:application",
+      "functions": {
+        "vercel_wsgi.py": {
+          "maxDuration": 120,
+          "excludeFiles": "{frontend/**,docs/**,output/**,backend/trips/tests/**}"
+        }
+      }
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "app" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
+  ]
+}

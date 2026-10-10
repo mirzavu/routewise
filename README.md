@@ -61,6 +61,11 @@ npm run build --prefix frontend
 
 ## Deploy
 
+**Vercel:** import this branch with root `./` and preset **Services**. The included `vercel.json` serves React at `/` and Django at `/api`.
+Set `MAPBOX_ACCESS_TOKEN`, `MAPBOX_PUBLIC_TOKEN`, `DJANGO_SECRET_KEY` and `DJANGO_DEBUG=false`. Add the deployed URL to the public Mapbox token's allowed URLs. See [deployment steps](docs/vercel-deployment.md).
+
+**Docker / Render:**
+
 ```bash
 docker build -t routewise .
 docker run --rm -p 8000:8000 --env-file .env routewise
