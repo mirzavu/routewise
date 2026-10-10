@@ -86,7 +86,7 @@ npm run build --prefix frontend
 
 Backend tests cover thresholds, cargo overrides, ranking, checkpoint interpolation, partial intervals, weather units and intervals, missing coverage, and API validation. Frontend tests cover timezone conversion and DST, editing location searches, trip submission/recovery, route selection, checkpoint inspection, and slider independence. Tests use isolated provider fixtures; production has no demo-data fallback.
 
-Visual and interaction QA uses Chrome DevTools MCP. Live Mapbox smoke testing requires configured credentials. The generated hero background and user-supplied logo are bundled local assets. The asset prompt is recorded in [docs/assets.md](docs/assets.md).
+Visual review is manual: check the landing page at desktop and mobile widths, submit a trip, switch routes, inspect a checkpoint, scrub the forecast, and edit the trip. Live Mapbox smoke testing requires configured credentials. The generated hero background and user-supplied logo are bundled local assets. The asset prompt is recorded in [docs/assets.md](docs/assets.md).
 
 ## Deployment
 

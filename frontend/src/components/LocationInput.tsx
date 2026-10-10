@@ -29,8 +29,9 @@ export default function LocationInput({
     setQuery(value?.label || '')
   }, [value])
   useEffect(() => {
+    setOptions([])
+    setActive(-1)
     if (!open || query.trim().length < 3 || value?.label === query) {
-      setOptions([])
       return
     }
     const controller = new AbortController()
@@ -85,7 +86,7 @@ export default function LocationInput({
           aria-expanded={open && options.length > 0}
           aria-controls={`${id}-options`}
           aria-autocomplete="list"
-          aria-activedescendant={active >= 0 ? `${id}-${active}` : undefined}
+          aria-activedescendant={open && options[active] ? `${id}-${active}` : undefined}
           onFocus={() => setOpen(true)}
           onChange={(e) => {
             if (value) {
@@ -103,9 +104,9 @@ export default function LocationInput({
             }
             if (e.key === 'ArrowUp') {
               e.preventDefault()
-              setActive((i) => Math.max(0, i - 1))
+              setActive((i) => (options.length ? Math.max(0, i - 1) : -1))
             }
-            if (e.key === 'Enter' && open && active >= 0) {
+            if (e.key === 'Enter' && open && options[active]) {
               e.preventDefault()
               select(options[active])
             }
