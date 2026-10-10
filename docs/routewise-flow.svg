@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="348" viewBox="0 0 1120 348" role="img" aria-labelledby="title desc">
+  <title id="title">How RouteWise compares a trip</title>
+  <desc id="desc">Enter trip details, obtain route alternatives from Mapbox, assess wind, rain and snow at checkpoint arrival times, and rank routes by weather risk and travel time.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f1f7ff"/>
+      <stop offset="1" stop-color="#f3edff"/>
+    </linearGradient>
+    <linearGradient id="accent">
+      <stop stop-color="#087bff"/>
+      <stop offset="1" stop-color="#622aff"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="1118" height="346" rx="22" fill="url(#background)" stroke="#e1e7f4"/>
+  <path d="M820 1h278a21 21 0 0 1 21 21v89" fill="none" stroke="#e6dfff" stroke-width="2"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="36" y="30" width="5" height="46" rx="2.5" fill="url(#accent)"/>
+    <text x="54" y="47" fill="#5426d6" font-size="11" font-weight="700" letter-spacing="2">ROUTEWISE</text>
+    <text x="54" y="73" fill="#14234b" font-size="23" font-weight="700">Weather checked when your truck gets there.</text>
+    <g fill="#fff" stroke="#dfe6f3">
+      <rect x="36" y="105" width="238" height="146" rx="14"/>
+      <rect x="306" y="105" width="238" height="146" rx="14"/>
+      <rect x="576" y="105" width="238" height="146" rx="14"/>
+      <rect x="846" y="105" width="238" height="146" rx="14"/>
+    </g>
+    <g stroke="#b8c4df" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M282 178h15m-5-5 5 5-5 5"/>
+      <path d="M552 178h15m-5-5 5 5-5 5"/>
+      <path d="M822 178h15m-5-5 5 5-5 5"/>
+    </g>
+    <circle cx="68" cy="139" r="17" fill="#edf4ff"/>
+    <g stroke="#087bff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M61 137a7 7 0 1 1 14 0c0 5-7 10-7 10s-7-5-7-10Z"/>
+      <circle cx="68" cy="136" r="2"/>
+    </g>
+    <text x="94" y="143" fill="#6d82a5" font-size="11" font-weight="700" letter-spacing="1">01 / PLAN</text>
+    <text x="54" y="184" fill="#14234b" font-size="18" font-weight="700">Enter your trip</text>
+    <text x="54" y="208" fill="#627797" font-size="13">Origin, destination, departure</text>
+    <text x="54" y="228" fill="#627797" font-size="13">Cargo weight &amp; checkpoint spacing</text>
+    <circle cx="338" cy="139" r="17" fill="#fff2e8"/>
+    <g stroke="#ff893b" stroke-width="1.8" fill="none" stroke-linecap="round">
+      <circle cx="332" cy="145" r="2"/>
+      <circle cx="344" cy="133" r="2"/>
+      <path d="M333 142v-6a3 3 0 0 1 3-3h5m-5 12h5a3 3 0 0 0 3-3v-5"/>
+    </g>
+    <text x="364" y="143" fill="#6d82a5" font-size="11" font-weight="700" letter-spacing="1">02 / ROUTE</text>
+    <text x="324" y="184" fill="#14234b" font-size="18" font-weight="700">Find alternatives</text>
+    <text x="324" y="208" fill="#627797" font-size="13">Mapbox routes &amp; driving estimates</text>
+    <text x="324" y="228" fill="#627797" font-size="13">Up to three distinct road routes</text>
+    <circle cx="608" cy="139" r="17" fill="#eef9f5"/>
+    <g stroke="#00ae80" stroke-width="1.8" fill="none" stroke-linecap="round">
+      <path d="M599 134h10a3 3 0 1 0-2-4m-9 9h16a2 2 0 1 1-2 2m-11 3h5a2 2 0 1 1-2 2"/>
+    </g>
+    <text x="634" y="143" fill="#6d82a5" font-size="11" font-weight="700" letter-spacing="1">03 / ASSESS</text>
+    <text x="594" y="184" fill="#14234b" font-size="18" font-weight="700">Check weather at ETA</text>
+    <text x="594" y="208" fill="#627797" font-size="13">Wind, rain, snow &amp; cargo rules</text>
+    <text x="594" y="228" fill="#627797" font-size="13">Samples every 10 / 25 / 50 miles</text>
+    <circle cx="878" cy="139" r="17" fill="#f1edff"/>
+    <g stroke="#622aff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m878 129 9 4v6c0 5-9 10-9 10s-9-5-9-10v-6Z"/>
+      <path d="m874 139 3 3 5-6"/>
+    </g>
+    <text x="904" y="143" fill="#6d82a5" font-size="11" font-weight="700" letter-spacing="1">04 / COMPARE</text>
+    <text x="864" y="184" fill="#14234b" font-size="18" font-weight="700">Recommend a route</text>
+    <text x="864" y="208" fill="#627797" font-size="13">Rank risk exposure &amp; travel time</text>
+    <text x="864" y="228" fill="#627797" font-size="13">Explore 48 hours from departure</text>
+    <path d="M36 275h1048" stroke="#dfe6f3"/>
+    <text x="36" y="302" fill="#627797" font-size="12" font-weight="700">RANKING ORDER</text>
+    <text x="172" y="302" fill="#24395e" font-size="13">Severe miles → High miles → Average risk → Travel time</text>
+    <rect x="869" y="285" width="215" height="27" rx="13.5" fill="#ede8fb"/>
+    <text x="976" y="303" text-anchor="middle" fill="#5426ad" font-size="11" font-weight="700">No Travel routes excluded</text>
+  </g>
+</svg>
