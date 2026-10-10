@@ -19,5 +19,5 @@
 - User update: visual checks belong to the user. No further Chrome DevTools use unless a critical UI issue resists normal debugging.
 - Final review: one fresh Astra reviewer found two important defects. Blank optional public-token fallback and stale autocomplete keyboard selection were fixed with RED→GREEN regression tests. No further material findings; map click-handler concern was not substantiated by installed Mapbox dispatch order.
 - Final verification after fixes: 61 backend tests, 12 frontend tests, Ruff, TypeScript/Vite production build and git diff whitespace checks pass.
-- Docker container smoke check: health/config API, landing HTML, bundled JS/CSS, hero and logo all served successfully. Rebuilding the final image after review fixes.
+- Final Docker image rebuilt after review fixes. Container smoke check passed: health/config API, blank public-token fallback, landing HTML, bundled JS/CSS, hero and logo.
 - Local development servers restarted; .env created privately from the example and remains git-ignored. Live integration, manual visual checks and account-dependent submission are pending.
