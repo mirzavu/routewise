@@ -8,7 +8,12 @@ LABELS = ["Low", "Moderate", "High", "Severe", "No Travel"]
 def classify(wind, rain, snow, load):
     values = [wind, rain, snow]
     if any(v is None or not math.isfinite(v) or v < 0 for v in values):
-        return {"level": None, "label": "Unknown", "reasons": ["Weather coverage is incomplete."]}
+        return {
+            "level": None,
+            "label": "Unknown",
+            "reasons": ["Weather coverage is incomplete."],
+            "components": {"wind": None, "rain": None, "snow": None},
+        }
     w = sum(wind >= t for t in [25, 35, 45, 55])
     r = 4 if rain > 1 else sum(rain >= t for t in [0.10, 0.25, 0.50])
     s = 4 if snow > 3 else sum(snow >= t for t in [0.5, 1, 2])
@@ -30,6 +35,7 @@ def classify(wind, rain, snow, load):
     return {
         "level": max(w, r, s),
         "label": LABELS[max(w, r, s)],
+        "components": {"wind": w, "rain": r, "snow": s},
         "reasons": reasons
         or ["Wind, rain and snow are below the assessment’s elevated-risk thresholds."],
     }

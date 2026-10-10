@@ -10,7 +10,7 @@ from .geometry import METERS_PER_MILE, corridor_grid, sample_route
 from .providers import ProviderError, get_locations, get_routes
 from .risk import classify, recommend, summarize
 from .serializers import CorridorSerializer, TripSerializer
-from .weather import fetch_forecasts, weather_at
+from .weather import condition_at, fetch_forecasts, weather_at
 
 logger = logging.getLogger(__name__)
 
@@ -125,24 +125,40 @@ def corridor(request):
     try:
         grid = corridor_grid(data["routes"])
         forecasts = fetch_forecasts(grid["points"])
-        reference = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+        reference = data["departure"].astimezone(timezone.utc)
         times = [reference + timedelta(hours=i) for i in range(49)]
         frames = []
+        conditions = []
+        risk_drivers = []
         for t in times:
             levels = []
+            condition = {"code": None, "is_day": None}
+            drivers = {"wind": None, "rain": None, "snow": None}
             for forecast in forecasts:
                 w = weather_at(forecast, t)
-                levels.append(
-                    classify(w["wind_mph"], w["rain_in_hr"], w["snow_in_hr"], data["load_lb"])[
-                        "level"
-                    ]
+                risk = classify(
+                    w["wind_mph"], w["rain_in_hr"], w["snow_in_hr"], data["load_lb"]
                 )
+                levels.append(risk["level"])
+                for name, level in risk["components"].items():
+                    if level is not None and (drivers[name] is None or level > drivers[name]):
+                        drivers[name] = level
+                current = condition_at(forecast, t)
+                # Highest WMO code describes corridor conditions; risk still uses measurements.
+                if current["code"] is not None and (
+                    condition["code"] is None or current["code"] > condition["code"]
+                ):
+                    condition = current
             frames.append(levels)
+            conditions.append(condition)
+            risk_drivers.append(drivers)
         return Response(
             {
                 **grid,
                 "times": [t.isoformat() for t in times],
                 "frames": frames,
+                "conditions": conditions,
+                "risk_drivers": risk_drivers,
                 "fetched_at": datetime.now(timezone.utc).isoformat(),
             }
         )

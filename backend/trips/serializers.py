@@ -60,6 +60,7 @@ class TripSerializer(serializers.Serializer):
 
 
 class CorridorSerializer(serializers.Serializer):
+    departure = serializers.DateTimeField()
     routes = serializers.ListField(
         child=serializers.ListField(child=Coordinates(), min_length=2, max_length=1000),
         min_length=1,

@@ -8,11 +8,49 @@ from django.core.cache import cache
 
 from .providers import get_json
 
+WMO_CODES = {
+    0,
+    1,
+    2,
+    3,
+    45,
+    48,
+    51,
+    53,
+    55,
+    56,
+    57,
+    61,
+    63,
+    65,
+    66,
+    67,
+    71,
+    73,
+    75,
+    77,
+    80,
+    81,
+    82,
+    85,
+    86,
+    95,
+    96,
+    97,
+    99,
+}
+
 
 def normalize(payload):
     hourly = payload.get("hourly", {})
     units = payload.get("hourly_units", {})
     times = hourly.get("time", [])
+
+    def series(name):
+        raw = hourly.get(name, [])
+        if not isinstance(raw, list):
+            raw = []
+        return (raw + [None] * len(times))[: len(times)]
 
     def values(name, kind):
         unit = units.get(name, "")
@@ -22,15 +60,11 @@ def normalize(payload):
             "snow": {"inch": 1, "in": 1, "cm": 1 / 2.54},
         }
         factor = factors[kind].get(unit)
-        raw = hourly.get(name, [])
-        if not isinstance(raw, list):
-            raw = []
-        raw = (raw + [None] * len(times))[: len(times)]
         return [
             v * factor
             if isinstance(v, (int, float)) and math.isfinite(v) and v >= 0 and factor is not None
             else None
-            for v in raw
+            for v in series(name)
         ]
 
     rain, showers = values("rain", "rain"), values("showers", "rain")
@@ -39,6 +73,10 @@ def normalize(payload):
         "wind": values("wind_speed_10m", "wind"),
         "rain": [a + b if a is not None and b is not None else None for a, b in zip(rain, showers)],
         "snow": values("snowfall", "snow"),
+        "weather_code": [
+            v if type(v) is int and v in WMO_CODES else None for v in series("weather_code")
+        ],
+        "is_day": [bool(v) if type(v) is int and v in (0, 1) else None for v in series("is_day")],
     }
 
 
@@ -66,12 +104,29 @@ def weather_at(forecast, arrival):
     }
 
 
+def condition_at(forecast, arrival):
+    """Use the latest hourly condition instant, never interpolate categorical codes."""
+    unknown = {"code": None, "is_day": None}
+    if not forecast or not forecast.get("times"):
+        return unknown
+    stamp = arrival.timestamp()
+    times = forecast["times"]
+    if stamp < times[0] or stamp > times[-1]:
+        return unknown
+    index = bisect.bisect_right(times, stamp) - 1
+    codes, daylight = forecast.get("weather_code", []), forecast.get("is_day", [])
+    return {
+        "code": codes[index] if index < len(codes) else None,
+        "is_day": daylight[index] if index < len(daylight) else None,
+    }
+
+
 def fetch_forecasts(points):
     hour = datetime.now(timezone.utc).strftime("%Y%m%d%H")
     unique = {tuple(round(v, 4) for v in p) for p in points}
 
     def key(p):
-        return "weather:" + hashlib.sha256(f"{hour}:{p}".encode()).hexdigest()
+        return "weather:v2:" + hashlib.sha256(f"{hour}:{p}".encode()).hexdigest()
 
     stored = {p: cache.get(key(p)) for p in unique}
     missing = [p for p in unique if stored[p] is None]
@@ -83,7 +138,7 @@ def fetch_forecasts(points):
             {
                 "latitude": ",".join(str(p[1]) for p in batch),
                 "longitude": ",".join(str(p[0]) for p in batch),
-                "hourly": "wind_speed_10m,rain,showers,snowfall",
+                "hourly": "wind_speed_10m,rain,showers,snowfall,weather_code,is_day",
                 "wind_speed_unit": "mph",
                 "precipitation_unit": "inch",
                 "timezone": "GMT",
