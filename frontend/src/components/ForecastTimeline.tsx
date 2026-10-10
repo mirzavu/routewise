@@ -26,6 +26,7 @@ export default function ForecastTimeline({
   visible,
   onVisible,
   routes,
+  selectedRoute,
   visibleRoutes,
   onToggleRoute,
 }: {
@@ -39,6 +40,7 @@ export default function ForecastTimeline({
   visible: boolean
   onVisible: () => void
   routes: Route[]
+  selectedRoute: Route
   visibleRoutes: string[]
   onToggleRoute: (id: string) => void
 }) {
@@ -56,6 +58,14 @@ export default function ForecastTimeline({
   const gradient = data
     ? `linear-gradient(90deg, ${data.times.map((_, i) => `${riskColor(i)} ${(i / 48) * 100}%`).join(', ')})`
     : '#dce7f3'
+  const forecastStart = data ? DateTime.fromISO(data.times[0]).toMillis() : NaN
+  const forecastEnd = data ? DateTime.fromISO(data.times.at(-1)!).toMillis() : NaN
+  const arrival = DateTime.fromISO(selectedRoute.arrival)
+  const arrivalPosition =
+    ((arrival.toMillis() - forecastStart) / (forecastEnd - forecastStart)) * 100
+  const arrivalInRange =
+    Number.isFinite(arrivalPosition) && arrivalPosition >= 0 && arrivalPosition <= 100
+  const arrivalLabel = `Route ${selectedRoute.id} arrival: ${localTime(selectedRoute.arrival, zone, true)}`
   // Native range thumbs travel within the track, inset by half their diameter.
   return (
     <section className="forecast-timeline" aria-label="48-hour forecast">
@@ -143,77 +153,99 @@ export default function ForecastTimeline({
                 <span key={t}>{time(t, 'h:mm a')}</span>
               ))}
             </div>
-            <input
-              className="timeline-scrubber"
-              type="range"
-              name="forecast-hour"
-              aria-label="Forecast hour"
-              aria-valuetext={data ? localTime(data.times[hour], zone, true) : 'Loading'}
-              min={0}
-              max={48}
-              step={1}
-              value={hour}
-              onChange={(e) => onHour(Number(e.target.value))}
-              disabled={loading || !data}
-            />
-            <div
-              className="timeline-symbols"
-              aria-label="Highest weather risk along the route corridor"
-            >
-              {Array.from({ length: 17 }, (_, i) => i * 3).map((t) => {
-                const risk = peakRisk(t)
-                const drivers = data?.risk_drivers?.[t]
-                const dominant = dominantWeatherDrivers(risk, drivers)
-                const unknown = risk === null || !drivers
-                const description = unknown
-                  ? 'Risk details unavailable'
-                  : risk === 0
-                    ? 'Low risk: wind, rain and snow below elevated-risk thresholds'
-                    : `${dominant.map(({ label }) => label).join(' + ')} · ${RISK_LABELS[risk!]} risk`
-                return (
-                  <span
-                    key={t}
-                    title={`+${t}h · ${time(t, 'h:mm a')}: ${description}`}
-                    className="timeline-risk-icons"
+            <div className="timeline-weather-track">
+              <input
+                className="timeline-scrubber"
+                type="range"
+                name="forecast-hour"
+                aria-label="Forecast hour"
+                aria-valuetext={data ? localTime(data.times[hour], zone, true) : 'Loading'}
+                min={0}
+                max={48}
+                step={1}
+                value={hour}
+                onChange={(e) => onHour(Number(e.target.value))}
+                disabled={loading || !data}
+              />
+              <div
+                className="timeline-symbols"
+                aria-label="Highest weather risk along the route corridor"
+              >
+                {Array.from({ length: 17 }, (_, i) => i * 3).map((t) => {
+                  const risk = peakRisk(t)
+                  const drivers = data?.risk_drivers?.[t]
+                  const dominant = dominantWeatherDrivers(risk, drivers)
+                  const unknown = risk === null || !drivers
+                  const description = unknown
+                    ? 'Risk details unavailable'
+                    : risk === 0
+                      ? 'Low risk: wind, rain and snow below elevated-risk thresholds'
+                      : `${dominant.map(({ label }) => label).join(' + ')} · ${RISK_LABELS[risk!]} risk`
+                  return (
+                    <span
+                      key={t}
+                      title={`+${t}h · ${time(t, 'h:mm a')}: ${description}`}
+                      className="timeline-risk-icons"
+                      role="img"
+                      aria-label={description}
+                      style={{ color: unknown ? '#94a3b8' : RISK_COLORS[risk!] }}
+                    >
+                      {unknown ? (
+                        <CircleHelp aria-hidden="true" />
+                      ) : risk === 0 ? (
+                        <ShieldCheck aria-hidden="true" />
+                      ) : (
+                        dominant.map(({ key, paths }) => (
+                          <svg
+                            key={key}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            {paths.map((d) => (
+                              <path key={d} d={d} />
+                            ))}
+                          </svg>
+                        ))
+                      )}
+                    </span>
+                  )
+                })}
+              </div>
+              <div
+                className="timeline-risk-band"
+                style={{ background: gradient }}
+                aria-label="Peak corridor risk over 48 hours"
+              />
+              {!loading && arrivalInRange && (
+                <div className="timeline-arrival-track">
+                  <div
+                    className={`timeline-arrival-marker ${arrivalPosition < 10 ? 'near-start' : arrivalPosition > 90 ? 'near-end' : ''}`}
                     role="img"
-                    aria-label={description}
-                    style={{ color: unknown ? '#94a3b8' : RISK_COLORS[risk!] }}
+                    aria-label={arrivalLabel}
+                    style={{
+                      left: `${arrivalPosition}%`,
+                      borderColor: ROUTE_COLORS[selectedRoute.id],
+                    }}
                   >
-                    {unknown ? (
-                      <CircleHelp aria-hidden="true" />
-                    ) : risk === 0 ? (
-                      <ShieldCheck aria-hidden="true" />
-                    ) : (
-                      dominant.map(({ key, paths }) => (
-                        <svg
-                          key={key}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          {paths.map((d) => (
-                            <path key={d} d={d} />
-                          ))}
-                        </svg>
-                      ))
-                    )}
-                  </span>
-                )
-              })}
+                    <span className="timeline-arrival-label" title={arrivalLabel}>
+                      Arrival · {arrival.setZone(zone).toFormat('h:mm a')}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
-            <div
-              className="timeline-risk-band"
-              style={{ background: gradient }}
-              aria-label="Peak corridor risk over 48 hours"
-            />
           </div>
         </>
       )}
       <p className="timeline-note">
+        {!loading && data && arrivalPosition > 100 && (
+          <span>Arrival beyond +48h · {localTime(selectedRoute.arrival, zone, true)}. </span>
+        )}
         {loading ? (
           <span role="status">Loading weather from departure… </span>
         ) : data && peakRisk(hour) === null ? (

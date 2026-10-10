@@ -425,6 +425,7 @@ export default function Workspace({
           <ForecastTimeline
             data={corridor}
             routes={result.routes}
+            selectedRoute={route}
             visibleRoutes={visibleRoutes}
             onToggleRoute={(id) =>
               setVisibleRoutes((ids) =>

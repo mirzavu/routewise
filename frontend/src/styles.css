@@ -1642,6 +1642,44 @@ fieldset {
   position: relative;
   z-index: 4;
 }
+.timeline-weather-track {
+  position: relative;
+  padding-top: 12px;
+}
+.timeline-arrival-track {
+  position: absolute;
+  inset: 0 calc(var(--timeline-thumb-size) / 2);
+  pointer-events: none;
+  z-index: 5;
+}
+.timeline-arrival-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed;
+}
+.timeline-arrival-label {
+  display: block;
+  width: max-content;
+  transform: translateX(-50%);
+  padding: 3px 7px;
+  background: #fff;
+  border: 1px solid #dce7f4;
+  border-radius: 5px;
+  color: #17375f;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+  box-shadow: 0 1px 4px #16365315;
+  pointer-events: auto;
+}
+.timeline-arrival-marker.near-start .timeline-arrival-label {
+  transform: none;
+}
+.timeline-arrival-marker.near-end .timeline-arrival-label {
+  transform: translateX(-100%);
+}
 .timeline-scrubber::-webkit-slider-thumb {
   appearance: none;
   box-sizing: border-box;

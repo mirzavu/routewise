@@ -158,6 +158,36 @@ it('keeps recommendation stable when selecting another route and scrubbing forec
   expect(screen.getByText(/Recommended: Route A/)).toBeInTheDocument()
   expect(vi.mocked(fetch).mock.calls.length).toBe(count)
 })
+it('moves the arrival marker to the selected route without changing the forecast hour', async () => {
+  const trips: Analysis = {
+    ...result,
+    routes: [
+      { ...a, arrival: '2026-10-12T14:30:00Z' },
+      { ...a, id: 'B', arrival: '2026-10-12T20:00:00Z' },
+    ],
+  }
+  render(<Workspace result={trips} trip={draft} token="" onEdit={() => {}} onHome={() => {}} />)
+  const slider = screen.getByRole('slider', { name: 'Forecast hour' })
+  await waitFor(() => expect(slider).toBeEnabled())
+  const marker = screen.getByRole('img', { name: 'Route A arrival: Oct 12, 9:30 AM CDT' })
+  expect(marker).toHaveStyle({ left: '3.125%' })
+  expect(screen.getByText('Arrival · 9:30 AM')).toBeInTheDocument()
+  fireEvent.change(slider, { target: { value: '12' } })
+  await userEvent.click(screen.getByRole('button', { name: /Inspect Route B/ }))
+  expect(screen.getByRole('img', { name: 'Route B arrival: Oct 12, 3:00 PM CDT' })).toHaveStyle({
+    left: `${(7 / 48) * 100}%`,
+  })
+  expect(slider).toHaveValue('12')
+})
+
+it('labels an arrival beyond the forecast window instead of pinning it to the end', async () => {
+  const trips: Analysis = { ...result, routes: [{ ...a, arrival: '2026-10-15T14:00:00Z' }] }
+  render(<Workspace result={trips} trip={draft} token="" onEdit={() => {}} onHome={() => {}} />)
+  await waitFor(() => expect(screen.getByRole('slider')).toBeEnabled())
+  expect(screen.queryByRole('img', { name: /Route A arrival/ })).not.toBeInTheDocument()
+  expect(screen.getByText(/Arrival beyond \+48h/)).toBeInTheDocument()
+})
+
 it('opens arrival-time weather when a checkpoint is clicked', async () => {
   render(<Workspace result={result} trip={draft} token="" onEdit={() => {}} onHome={() => {}} />)
   await userEvent.click(screen.getByText('Map checkpoint'))
